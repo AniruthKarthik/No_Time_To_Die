@@ -144,7 +144,6 @@ int main() {
     double lastTime = GetTime();
     bool isGameOver = false;
 
-    // Initialize corner balls
     cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
     cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-right
     cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-left
@@ -159,10 +158,8 @@ int main() {
     while (!WindowShouldClose()) {
         if (!isGameOver) {
             hero.updatePos();
-
             int newSpeed = (hero.isMoving) ? 8 : 1;
 
-            // Update all balls' speed based on hero's movement
             for (auto& ball : balls) {
                 ball.adjustSpeed(newSpeed);
             }
@@ -170,19 +167,16 @@ int main() {
                 cornerBall.adjustSpeed(newSpeed);
             }
 
-            // Add new balls every 3 seconds
             double currentTime = GetTime();
             if (currentTime - lastTime >= 3.0 && !isYellow) {
                 balls.push_back(Ball(screenWidth, screenHeight, 20, WHITE));
                 lastTime = currentTime;
             }
 
-            // Increase score if hero is moving
             if (hero.isMoving) {
                 score++;
             }
 
-            // Update all balls' positions
             for (auto& ball : balls) {
                 ball.updatePos(screenWidth, screenHeight);
             }
@@ -190,70 +184,60 @@ int main() {
                 cornerBall.updatePos(screenWidth, screenHeight);
             }
 
-            // Check for collision between hero and any ball
             if (hero.checkCollision(balls) || hero.checkCollision(cornerBalls)) {
-                isGameOver = true;  // End game if collision occurs
+                isGameOver = true;
             }
         }
 
-        // Handle timing and color changes
-        if (GetTime() - stateTime >= 10.0 && !isYellow) {  // Set yellow time to 3 seconds
+        if (GetTime() - stateTime >= 10.0 && !isYellow) {
             isYellow = true;
             canDelete = true;
-            // Change all balls to yellow and enable destruction
             for (auto& ball : balls) {
                 ball.color = YELLOW;
-                ball.setDestroyable(true);  // Enable destruction
+                ball.setDestroyable(true);
             }
             for (auto& cornerBall : cornerBalls) {
                 cornerBall.color = YELLOW;
-                cornerBall.setDestroyable(true);  // Enable destruction
+                cornerBall.setDestroyable(true);
             }
-            stateTime = GetTime();  // Reset the state time
+            stateTime = GetTime();
         }
 
-        if (GetTime() - stateTime >= 13.0 && isYellow) {  // Reset to white after 3 seconds (total 10 seconds for white)
-            // Change all balls back to white and disable destruction
+        if (GetTime() - stateTime >= 3.0 && isYellow) {
             for (auto& ball : balls) {
                 ball.color = WHITE;
-                ball.setDestroyable(false);  // Disable destruction
+                ball.setDestroyable(false);
             }
             for (auto& cornerBall : cornerBalls) {
                 cornerBall.color = WHITE;
-                cornerBall.setDestroyable(false);  // Disable destruction
+                cornerBall.setDestroyable(false);
             }
-
-            // Disable deletion and allow new ball spawn
             isYellow = false;
             canDelete = false;
-            stateTime = GetTime();  // Reset the state time
-
-            // Spawn a new ball after the white period
+            stateTime = GetTime();
             balls.push_back(Ball(screenWidth, screenHeight, 20, WHITE));
         }
 
-        // Delete clicked balls if they are yellow and destroyable
         if (canDelete) {
-    Vector2 mousePoint = GetMousePosition();
-    for (auto it = balls.begin(); it != balls.end();) {
-        if (it->isClicked(mousePoint) && it->destroyable && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            it = balls.erase(it);
-            score += 100;  // Add points for destroying a ball
-        } else {
-            ++it;
+            Vector2 mousePoint = GetMousePosition();
+            for (auto it = balls.begin(); it != balls.end();) {
+                if (it->isClicked(mousePoint) && it->destroyable && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    it = balls.erase(it);
+                    score += 100;
+                } else {
+                    ++it;
+                }
+            }
+            for (auto it = cornerBalls.begin(); it != cornerBalls.end();) {
+                if (it->isClicked(mousePoint) && it->destroyable && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    it = cornerBalls.erase(it);
+                    score += 5000;
+                } else {
+                    ++it;
+                }
+            }
         }
-    }
-    for (auto it = cornerBalls.begin(); it != cornerBalls.end();) {
-        if (it->isClicked(mousePoint) && it->destroyable && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            it = cornerBalls.erase(it);
-            score += 5000;  // Add points for corner ball destruction
-        } else {
-            ++it;
-        }
-    }
-}
 
-        // Draw everything
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -261,39 +245,45 @@ int main() {
             DrawText("GAME OVER!", screenWidth / 2 - 100, screenHeight / 2 - 100, 50, RED);
             DrawText(TextFormat("Score: %i", score), screenWidth / 2 - 50, screenHeight / 2, 30, WHITE);
 
-            // Retry button
             if (CheckCollisionPointRec(GetMousePosition(), retryButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                // Reset game state
+                // Reset the game state
                 isGameOver = false;
                 score = 0;
+
+                // Clear existing balls and recreate corner balls
                 balls.clear();
                 cornerBalls.clear();
+                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
+                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-right
+                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-left
+                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-right
+
+                // Reset hero position and states
                 hero.centerX = screenWidth / 2;
                 hero.centerY = screenHeight / 2;
-                stateTime = GetTime();  // Reset time when retrying
-                isYellow = false;  // Reset ball color state
+                stateTime = GetTime();
+                isYellow = false;
                 canDelete = false;
             }
-            DrawRectangleRec(retryButton, GREEN);
-            DrawText("Retry", retryButton.x + 70, retryButton.y + 15, 30, WHITE);
+
+            DrawRectangleRec(retryButton, DARKGREEN);
+            DrawText("Retry", screenWidth / 2 - 30, screenHeight / 2 + 60, 30, WHITE);
         } else {
-            // Draw balls and hero
-            hero.draw();
-            for (auto& ball : balls) {
+            for (const auto& ball : balls) {
                 ball.draw();
             }
-            for (auto& cornerBall : cornerBalls) {
+            for (const auto& cornerBall : cornerBalls) {
                 cornerBall.draw();
             }
+            hero.draw();
 
-            // Display score
-            DrawText(TextFormat("Score: %i", score), 10, 10, 30, WHITE);
+            DrawText(TextFormat("Score: %i", score), 20, 20, 30, WHITE);
+            DrawText(TextFormat("Time: %.2f", GetTime() - stateTime), 20, 60, 30, WHITE);
         }
 
         EndDrawing();
     }
 
-    CloseWindow();  // Close window and OpenGL context
-
+    CloseWindow();
     return 0;
 }
