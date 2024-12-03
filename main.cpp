@@ -133,7 +133,11 @@ int main() {
     const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "No time to die");
+    InitAudioDevice();
     SetTargetFPS(120);
+
+    Sound sound=LoadSound("assets/mdmp3.mp3");
+    PlaySound(sound);
 
     Hero hero(5, 30, 5, screenWidth / 2, screenHeight / 2);
     hero.xvelocity = 5;
@@ -175,6 +179,10 @@ int main() {
 
             if (hero.isMoving) {
                 score++;
+                SetSoundPitch(sound,1.0f);
+            }
+            else{
+                SetSoundPitch(sound,0.8f);
             }
 
             for (auto& ball : balls) {
@@ -283,7 +291,8 @@ int main() {
 
         EndDrawing();
     }
-
+    UnloadSound(sound);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
