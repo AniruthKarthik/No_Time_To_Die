@@ -5,6 +5,10 @@
 #include <vector>
 #include <iostream>
 
+
+enum GameState { INSTRUCTIONS, GAME };
+GameState currentState = INSTRUCTIONS;
+
 class Ball {
 public:
     int x, y;
@@ -64,61 +68,96 @@ public:
 
 class Hero {
 public:
-    int points, outerRadius, innerRadius;
+    int points;
     float centerX, centerY, xvelocity, yvelocity;
-    Vector2 vertices[10];
+    Rectangle heroRect;
     bool isMoving;
+    Texture2D spriteSheet;
+    int currentFrame;
+    int framesCounter;
+    int framesSpeed;
 
-    Hero(int p, int oRadius, int iRadius, float cX, float cY)
-        : points(p), outerRadius(oRadius), innerRadius(iRadius), centerX(cX), centerY(cY), xvelocity(0), yvelocity(0), isMoving(false) {
-        calculateVertices();
-    }
+    Hero(int p, float cX, float cY)
+    : points(p), centerX(cX), centerY(cY), 
+      xvelocity(0), yvelocity(0), isMoving(false), 
+      currentFrame(0), framesCounter(0), framesSpeed(5) {
+    spriteSheet = LoadTexture("assets/scarfy.png");
+    // Use actual texture dimensions
+    heroRect = {cX - spriteSheet.width/12, cY - spriteSheet.height/2, 
+                static_cast<float>(spriteSheet.width/6), 
+                static_cast<float>(spriteSheet.height)};
+}
 
-    void calculateVertices() {
-        for (int i = 0; i < points * 2; i++) {
-            float angle = (2.0f * PI / points) * i;
-            float radius = (i % 2 == 0) ? outerRadius : innerRadius;
-            vertices[i] = {static_cast<float>(centerX + radius * cos(angle)), 
-                           static_cast<float>(centerY + radius * sin(angle))};
-        }
+    ~Hero() {
+        UnloadTexture(spriteSheet);
     }
 
     void draw() const {
-        for (int i = 0; i < points * 2; i++) {
-            int nextIndex = (i + 1) % (points * 2);
-            DrawLineV(vertices[i], vertices[nextIndex], WHITE);
+        // Sprite animation logic
+        int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
+        Rectangle sourceRec = { 
+            static_cast<float>(currentFrame * frameWidth), 0.0f, 
+            static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
+        };
+        Rectangle destRec = { 
+            centerX - frameWidth / 2.0f, 
+            centerY - spriteSheet.height / 2.0f, 
+            static_cast<float>(frameWidth), 
+            static_cast<float>(spriteSheet.height) 
+        };
+
+        DrawTexturePro(spriteSheet, sourceRec, destRec, 
+                       {frameWidth / 2.0f, spriteSheet.height / 2.0f}, 0.0f, WHITE);
+    }
+
+    void updateAnimation() {
+        framesCounter++;
+        if (framesCounter >= (60 / framesSpeed)) {
+            framesCounter = 0;
+            currentFrame++;
+            
+            if (currentFrame >= 6) {  // Assuming 6 frames in the sprite sheet
+                currentFrame = 0;
+            }
         }
     }
 
     void updatePos() {
         isMoving = false;
 
-        if (IsKeyDown(KEY_W) && centerY - outerRadius > 0) {
+        if (IsKeyDown(KEY_W) && heroRect.y > 0) {
             centerY -= yvelocity;
+            heroRect.y -= yvelocity;
             isMoving = true;
         }
-        if (IsKeyDown(KEY_S) && centerY + outerRadius < GetScreenHeight()) {
+        if (IsKeyDown(KEY_S) && heroRect.y + heroRect.height < GetScreenHeight()) {
             centerY += yvelocity;
+            heroRect.y += yvelocity;
             isMoving = true;
         }
-        if (IsKeyDown(KEY_A) && centerX - outerRadius > 0) {
+        if (IsKeyDown(KEY_A) && heroRect.x > 0) {
             centerX -= xvelocity;
+            heroRect.x -= xvelocity;
             isMoving = true;
         }
-        if (IsKeyDown(KEY_D) && centerX + outerRadius < GetScreenWidth()) {
+        if (IsKeyDown(KEY_D) && heroRect.x + heroRect.width < GetScreenWidth()) {
             centerX += xvelocity;
+            heroRect.x += xvelocity;
             isMoving = true;
         }
 
-        calculateVertices();
+        // Update animation frame only when moving
+        if (isMoving) {
+            updateAnimation();
+        } else {
+            currentFrame = 0;  // Reset to first frame when not moving
+        }
     }
 
     bool checkCollision(const std::vector<Ball>& balls) {
         for (const auto& ball : balls) {
-            int dx = ball.x - centerX;
-            int dy = ball.y - centerY;
-            int distanceSquared = dx * dx + dy * dy;
-            if (distanceSquared <= (outerRadius + ball.radius) * (outerRadius + ball.radius)) {
+            if (CheckCollisionCircleRec({static_cast<float>(ball.x), static_cast<float>(ball.y)}, 
+                                        ball.radius, heroRect)) {
                 return true;  // Collision detected
             }
         }
@@ -139,7 +178,7 @@ int main() {
     Sound sound=LoadSound("assets/mdmp3.mp3");
     PlaySound(sound);
 
-    Hero hero(5, 30, 5, screenWidth / 2, screenHeight / 2);
+    Hero hero(5, screenWidth / 2, screenHeight / 2);
     hero.xvelocity = 5;
     hero.yvelocity = 5;
 
@@ -269,6 +308,8 @@ int main() {
                 // Reset hero position and states
                 hero.centerX = screenWidth / 2;
                 hero.centerY = screenHeight / 2;
+                hero.heroRect.x = screenWidth / 2 - hero.heroRect.width/2;
+                hero.heroRect.y = screenHeight / 2 - hero.heroRect.height/2;
                 stateTime = GetTime();
                 isYellow = false;
                 canDelete = false;
