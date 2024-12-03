@@ -93,22 +93,27 @@ public:
     }
 
     void draw() const {
-        // Sprite animation logic
-        int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
-        Rectangle sourceRec = { 
-            static_cast<float>(currentFrame * frameWidth), 0.0f, 
-            static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
-        };
-        Rectangle destRec = { 
-            centerX - frameWidth / 2.0f, 
-            centerY - spriteSheet.height / 2.0f, 
-            static_cast<float>(frameWidth), 
-            static_cast<float>(spriteSheet.height) 
-        };
-
-        DrawTexturePro(spriteSheet, sourceRec, destRec, 
-                       {frameWidth / 2.0f, spriteSheet.height / 2.0f}, 0.0f, WHITE);
+    int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
+    Rectangle sourceRec = { 
+        static_cast<float>(currentFrame * frameWidth), 0.0f, 
+        static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
+    };
+    
+    // Check if moving left and flip the source rectangle if so
+    if (IsKeyDown(KEY_A)) {
+        sourceRec.width = -sourceRec.width;  // Negative width flips horizontally
     }
+
+    Rectangle destRec = { 
+        centerX - frameWidth / 2.0f, 
+        centerY - spriteSheet.height / 2.0f, 
+        static_cast<float>(frameWidth), 
+        static_cast<float>(spriteSheet.height) 
+    };
+
+    DrawTexturePro(spriteSheet, sourceRec, destRec, 
+                   {frameWidth / 2.0f, spriteSheet.height / 2.0f}, 0.0f, WHITE);
+}
 
     void updateAnimation() {
         framesCounter++;
@@ -164,6 +169,13 @@ public:
         return false;
     }
 };
+void ShowInstructions(int screenWidth, int screenHeight) {
+    DrawText("WELCOME TO NO TIME TO DIE!", screenWidth / 2 - 350, screenHeight / 4, 40, WHITE);
+    DrawText("Use W, A, S, D to move the hero.", screenWidth / 2 - 250, screenHeight / 4 + 50, 30, WHITE);
+    DrawText("Avoid balls and try to survive!", screenWidth / 2 - 250, screenHeight / 4 + 100, 30, WHITE);
+    DrawText("Yellow balls can be clicked to destroy.", screenWidth / 2 - 250, screenHeight / 4 + 150, 30, WHITE);
+    DrawText("Press ENTER to start!", screenWidth / 2 - 200, screenHeight / 4 + 200, 30, WHITE);
+}
 
 int main() {
     int score = 0;
