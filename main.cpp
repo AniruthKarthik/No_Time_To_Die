@@ -208,6 +208,7 @@ int main() {
     InitAudioDevice();
     SetTargetFPS(120);
 
+    Texture2D background=LoadTexture("assets/nbg.png");
     Sound sound = LoadSound("assets/mdmp3.mp3");
     PlaySound(sound);
 
@@ -331,6 +332,7 @@ int main() {
 
         BeginDrawing();
         ClearBackground(BLACK);
+        DrawTexture(background, 0, 0, WHITE);
 
         if (isGameOver) {
             DrawText("GAME OVER!", screenWidth / 2 - 100, screenHeight / 2 - 100, 50, RED);
@@ -376,6 +378,7 @@ int main() {
     }
 
     UnloadSound(sound);
+    UnloadTexture(background);
     CloseAudioDevice();
     CloseWindow();
     return 0;
