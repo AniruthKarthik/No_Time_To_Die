@@ -221,8 +221,6 @@ int main() {
     bool isGameOver = false;
 
     cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
-    cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-right
-    cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-left
     cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-right
 
     Rectangle retryButton = {screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50};
@@ -334,8 +332,6 @@ int main() {
                 balls.clear();
                 cornerBalls.clear();
                 cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
-                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-right
-                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-left
                 cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-right
 
                 // Reset hero position and states
