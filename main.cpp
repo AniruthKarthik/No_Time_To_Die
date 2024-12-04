@@ -188,15 +188,15 @@ public:
     }
 };
 
-// Rest of the main function remains the same as in the previous implementation
-// [The entire previous main() function would be copied here]
-// The changes are only in the Hero class implementation
 void ShowInstructions(int screenWidth, int screenHeight) {
-    DrawText("WELCOME TO NO TIME TO DIE!", screenWidth / 2 - 350, screenHeight / 4, 40, WHITE);
-    DrawText("Use W, A, S, D to move the hero.", screenWidth / 2 - 250, screenHeight / 4 + 50, 30, WHITE);
-    DrawText("Avoid balls and try to survive!", screenWidth / 2 - 250, screenHeight / 4 + 100, 30, WHITE);
-    DrawText("Yellow balls can be clicked to destroy.", screenWidth / 2 - 250, screenHeight / 4 + 150, 30, WHITE);
-    DrawText("Press ENTER to start!", screenWidth / 2 - 200, screenHeight / 4 + 200, 30, WHITE);}
+    DrawText("WELCOME TO NO TIME TO DIE!", static_cast<float>(screenWidth / 2 - 350), static_cast<float>(screenHeight / 4), 40, WHITE);
+    DrawText("Use W, A, S, D to move the hero.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 50), 30, WHITE);
+    DrawText("Avoid balls and try to survive!", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 100), 30, WHITE);
+    DrawText("Yellow balls can be clicked to destroy.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 150), 30, WHITE);
+    DrawText("Press ENTER to start!", static_cast<float>(screenWidth / 2 - 200), static_cast<float>(screenHeight / 4 + 200), 30, WHITE);
+
+    // Correct the other DrawText for screenWidth / 2 - 450 and screenHeight / 6
+}
 
 int main() {
     int score = 0;
@@ -208,7 +208,7 @@ int main() {
     InitAudioDevice();
     SetTargetFPS(120);
 
-    Sound sound=LoadSound("assets/mdmp3.mp3");
+    Sound sound = LoadSound("assets/mdmp3.mp3");
     PlaySound(sound);
 
     Hero hero(5, screenWidth / 2, screenHeight / 2);
@@ -225,9 +225,23 @@ int main() {
 
     Rectangle retryButton = {screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50};
 
-    double stateTime = GetTime();
+    double stateTime = 0.0;  // Initialize to 0, it will be set when the game starts
     bool isYellow = false;
     bool canDelete = false;
+
+    while (!WindowShouldClose() && currentState == INSTRUCTIONS) {
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        ShowInstructions(screenWidth, screenHeight);
+
+        if (IsKeyPressed(KEY_ENTER)) {
+            currentState = GAME;
+            stateTime = GetTime();  // Start the game timer after ENTER is pressed
+        }
+
+        EndDrawing();
+    }
 
     while (!WindowShouldClose()) {
         if (!isGameOver) {
@@ -249,10 +263,9 @@ int main() {
 
             if (hero.isMoving) {
                 score++;
-                SetSoundPitch(sound,1.0f);
-            }
-            else{
-                SetSoundPitch(sound,0.8f);
+                SetSoundPitch(sound, 1.0f);
+            } else {
+                SetSoundPitch(sound, 0.8f);
             }
 
             for (auto& ball : balls) {
@@ -337,8 +350,8 @@ int main() {
                 // Reset hero position and states
                 hero.centerX = screenWidth / 2;
                 hero.centerY = screenHeight / 2;
-                hero.heroRect.x = screenWidth / 2 - hero.heroRect.width/2;
-                hero.heroRect.y = screenHeight / 2 - hero.heroRect.height/2;
+                hero.heroRect.x = screenWidth / 2 - hero.heroRect.width / 2;
+                hero.heroRect.y = screenHeight / 2 - hero.heroRect.height / 2;
                 stateTime = GetTime();
                 isYellow = false;
                 canDelete = false;
@@ -361,6 +374,7 @@ int main() {
 
         EndDrawing();
     }
+
     UnloadSound(sound);
     CloseAudioDevice();
     CloseWindow();
