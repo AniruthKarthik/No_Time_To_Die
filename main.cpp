@@ -99,32 +99,29 @@ public:
     }
 
     void draw() const {
-        int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
-        Rectangle sourceRec = { 
-            static_cast<float>(currentFrame * frameWidth), 0.0f, 
-            static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
-        };
+    int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
+    Rectangle sourceRec = { 
+        static_cast<float>(currentFrame * frameWidth), 0.0f, 
+        static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
+    };
 
-        // Modify source rectangle to mirror horizontally when facing left
-        if (!isFacingRight) {
-            sourceRec.width = -sourceRec.width;
-        }
-
-        Rectangle destRec = { 
-            heroRect.x,  
-            heroRect.y,  
-            heroRect.width,   
-            heroRect.height   
-        };
-
-        Vector2 origin = { 
-            static_cast<float>(frameWidth / 2.0f), 
-            static_cast<float>(spriteSheet.height / 2.0f) 
-        };
-
-        DrawTexturePro(spriteSheet, sourceRec, destRec, origin, 0.0f, WHITE);
-        DrawRectangleLinesEx(heroRect, 2, RED);
+    // Mirror the texture when facing left
+    if (!isFacingRight) {
+        sourceRec.width = -sourceRec.width;
     }
+
+    // Use heroRect for destination rectangle
+    Rectangle destRec = heroRect;
+
+    // The origin is adjusted to the top-left since heroRect already positions correctly
+    Vector2 origin = { 0.0f, 0.0f };
+
+    // Draw the texture inside the rectangle
+    DrawTexturePro(spriteSheet, sourceRec, destRec, origin, 0.0f, WHITE);
+
+    // Optional: Draw the red bounding rectangle for debugging
+    DrawRectangleLinesEx(heroRect, 2, RED);
+}
 
     void updatePos() {
         isMoving = false;
