@@ -115,7 +115,6 @@ public:
 
     // The origin is adjusted to the top-left since heroRect already positions correctly
     Vector2 origin = { 0.0f, 0.0f };
-
     // Draw the texture inside the rectangle
     DrawTexturePro(spriteSheet, sourceRec, destRec, origin, 0.0f, WHITE);
 
@@ -190,13 +189,13 @@ public:
 
 void ShowInstructions(int screenWidth, int screenHeight) {
     DrawText("WELCOME TO >> NO TIME TO DIE!", static_cast<float>(screenWidth / 2 - 350), static_cast<float>(screenHeight / 4), 40, WHITE);
-    DrawText("Use W, A, S, D to move the hero.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 100), 30, WHITE);
-    DrawText("Avoid balls and try to survive!", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 150), 30, WHITE);
+    DrawText("Use W, A, S, D to move the hero.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 100), 30, YELLOW);
+    DrawText("Avoid balls and try to survive!", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 150), 30, YELLOW);
 
     // Calculate the width of the text and center it
     const char* instructionText = "Yellow balls can be clicked to destroy.";
     int textWidth = MeasureText(instructionText, 30);
-    DrawText(instructionText, static_cast<float>(screenWidth / 2 - textWidth / 2), static_cast<float>(screenHeight / 4 + 200), 30, WHITE);
+    DrawText(instructionText, static_cast<float>(screenWidth / 2 - textWidth / 2), static_cast<float>(screenHeight / 4 + 200), 30, YELLOW);
 
     DrawText("Press ENTER to start!", static_cast<float>(screenWidth / 2 - 200), static_cast<float>(screenHeight / 4 + 300), 30, WHITE);
 }
