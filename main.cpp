@@ -120,7 +120,7 @@ public:
     DrawTexturePro(spriteSheet, sourceRec, destRec, origin, 0.0f, WHITE);
 
     // Optional: Draw the red bounding rectangle for debugging
-    DrawRectangleLinesEx(heroRect, 2, RED);
+    // DrawRectangleLinesEx(heroRect, 2, RED);
 }
 
     void updatePos() {
@@ -189,14 +189,18 @@ public:
 };
 
 void ShowInstructions(int screenWidth, int screenHeight) {
-    DrawText("WELCOME TO NO TIME TO DIE!", static_cast<float>(screenWidth / 2 - 350), static_cast<float>(screenHeight / 4), 40, WHITE);
-    DrawText("Use W, A, S, D to move the hero.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 50), 30, WHITE);
-    DrawText("Avoid balls and try to survive!", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 100), 30, WHITE);
-    DrawText("Yellow balls can be clicked to destroy.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 150), 30, WHITE);
-    DrawText("Press ENTER to start!", static_cast<float>(screenWidth / 2 - 200), static_cast<float>(screenHeight / 4 + 200), 30, WHITE);
+    DrawText("WELCOME TO >> NO TIME TO DIE!", static_cast<float>(screenWidth / 2 - 350), static_cast<float>(screenHeight / 4), 40, WHITE);
+    DrawText("Use W, A, S, D to move the hero.", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 100), 30, WHITE);
+    DrawText("Avoid balls and try to survive!", static_cast<float>(screenWidth / 2 - 250), static_cast<float>(screenHeight / 4 + 150), 30, WHITE);
 
-    // Correct the other DrawText for screenWidth / 2 - 450 and screenHeight / 6
+    // Calculate the width of the text and center it
+    const char* instructionText = "Yellow balls can be clicked to destroy.";
+    int textWidth = MeasureText(instructionText, 30);
+    DrawText(instructionText, static_cast<float>(screenWidth / 2 - textWidth / 2), static_cast<float>(screenHeight / 4 + 200), 30, WHITE);
+
+    DrawText("Press ENTER to start!", static_cast<float>(screenWidth / 2 - 200), static_cast<float>(screenHeight / 4 + 300), 30, WHITE);
 }
+
 
 int main() {
     int score = 0;
@@ -335,32 +339,46 @@ int main() {
         DrawTexture(background, 0, 0, WHITE);
 
         if (isGameOver) {
-            DrawText("GAME OVER!", screenWidth / 2 - 100, screenHeight / 2 - 100, 50, RED);
-            DrawText(TextFormat("Score: %i", score), screenWidth / 2 - 50, screenHeight / 2, 30, WHITE);
+    // GAME OVER text
+    const char* gameOverText = "GAME OVER!";
+    int gameOverWidth = MeasureText(gameOverText, 50);
+    DrawText(gameOverText, screenWidth / 2 - gameOverWidth / 2, screenHeight / 2 - 100, 50, RED);
 
-            if (CheckCollisionPointRec(GetMousePosition(), retryButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                // Reset the game state
-                isGameOver = false;
-                score = 0;
+    // Score text
+    const char* scoreText = TextFormat("Score: %i", score);
+    int scoreWidth = MeasureText(scoreText, 30);
+    DrawText(scoreText, screenWidth / 2 - scoreWidth / 2, screenHeight / 2, 30, WHITE);
 
-                // Clear existing balls and recreate corner balls
-                balls.clear();
-                cornerBalls.clear();
-                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
-                cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-right
+    // Retry button and text
+    if (CheckCollisionPointRec(GetMousePosition(), retryButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Reset the game state
+        isGameOver = false;
+        score = 0;
 
-                // Reset hero position and states
-                hero.centerX = screenWidth / 2;
-                hero.centerY = screenHeight / 2;
-                hero.heroRect.x = screenWidth / 2 - hero.heroRect.width / 2;
-                hero.heroRect.y = screenHeight / 2 - hero.heroRect.height / 2;
-                stateTime = GetTime();
-                isYellow = false;
-                canDelete = false;
-            }
+        // Clear existing balls and recreate corner balls
+        balls.clear();
+        cornerBalls.clear();
+        cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Top-left
+        cornerBalls.push_back(Ball(screenWidth, screenHeight, 20, WHITE, 100, 100)); // Bottom-right
 
-            DrawRectangleRec(retryButton, DARKGREEN);
-            DrawText("Retry", screenWidth / 2 - 30, screenHeight / 2 + 60, 30, WHITE);
+        // Reset hero position and states
+        hero.centerX = screenWidth / 2;
+        hero.centerY = screenHeight / 2;
+        hero.heroRect.x = screenWidth / 2 - hero.heroRect.width / 2;
+        hero.heroRect.y = screenHeight / 2 - hero.heroRect.height / 2;
+        stateTime = GetTime();
+        isYellow = false;
+        canDelete = false;
+    }
+
+    // Retry button rectangle
+    DrawRectangleRec(retryButton, DARKGREEN);
+
+    // Retry text
+    const char* retryText = "Retry";
+    int retryWidth = MeasureText(retryText, 30);
+    DrawText(retryText, screenWidth / 2 - retryWidth / 2, screenHeight / 2 + 60, 30, WHITE);
+
         } else {
             for (const auto& ball : balls) {
                 ball.draw();
