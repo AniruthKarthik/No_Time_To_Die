@@ -5,7 +5,6 @@
 #include <vector>
 #include <iostream>
 
-
 enum GameState { INSTRUCTIONS, GAME };
 GameState currentState = INSTRUCTIONS;
 
@@ -72,6 +71,7 @@ public:
     float centerX, centerY, xvelocity, yvelocity;
     Rectangle heroRect;
     bool isMoving;
+    bool isFacingRight;
     Texture2D spriteSheet;
     int currentFrame;
     int framesCounter;
@@ -80,51 +80,50 @@ public:
     Hero(int p, float cX, float cY)
     : points(p), centerX(cX), centerY(cY), 
       xvelocity(0), yvelocity(0), isMoving(false), 
+      isFacingRight(true),
       currentFrame(0), framesCounter(0), framesSpeed(5) {
-    spriteSheet = LoadTexture("assets/scarfy.png");
-    // Use actual texture dimensions
-    heroRect = {cX - spriteSheet.width/12, cY - spriteSheet.height/2, 
-                static_cast<float>(spriteSheet.width/6), 
-                static_cast<float>(spriteSheet.height)};
-}
+        spriteSheet = LoadTexture("assets/scarfy.png");
+        int frameWidth = spriteSheet.width / 6;
+        int frameHeight = spriteSheet.height;
+        
+        heroRect = {
+            cX - frameWidth / 2.0f, 
+            cY - frameHeight / 2.0f, 
+            static_cast<float>(frameWidth),   
+            static_cast<float>(frameHeight)   
+        };
+    }
 
     ~Hero() {
         UnloadTexture(spriteSheet);
     }
 
     void draw() const {
-    int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
-    Rectangle sourceRec = { 
-        static_cast<float>(currentFrame * frameWidth), 0.0f, 
-        static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
-    };
-    
-    // Check if moving left and flip the source rectangle if so
-    if (IsKeyDown(KEY_A)) {
-        sourceRec.width = -sourceRec.width;  // Negative width flips horizontally
-    }
+        int frameWidth = spriteSheet.width / 6;  // Assuming 6 frames in the sprite sheet
+        Rectangle sourceRec = { 
+            static_cast<float>(currentFrame * frameWidth), 0.0f, 
+            static_cast<float>(frameWidth), static_cast<float>(spriteSheet.height) 
+        };
 
-    Rectangle destRec = { 
-        centerX - frameWidth / 2.0f, 
-        centerY - spriteSheet.height / 2.0f, 
-        static_cast<float>(frameWidth), 
-        static_cast<float>(spriteSheet.height) 
-    };
-
-    DrawTexturePro(spriteSheet, sourceRec, destRec, 
-                   {frameWidth / 2.0f, spriteSheet.height / 2.0f}, 0.0f, WHITE);
-}
-
-    void updateAnimation() {
-        framesCounter++;
-        if (framesCounter >= (60 / framesSpeed)) {
-            framesCounter = 0;
-            currentFrame++;
-            
-            if (currentFrame >= 6) {  // Assuming 6 frames in the sprite sheet
-                currentFrame = 0;
-            }
+        // Modify source rectangle to mirror horizontally when facing left
+        if (!isFacingRight) {
+            sourceRec.width = -sourceRec.width;
         }
+
+        Rectangle destRec = { 
+            heroRect.x,  
+            heroRect.y,  
+            heroRect.width,   
+            heroRect.height   
+        };
+
+        Vector2 origin = { 
+            static_cast<float>(frameWidth / 2.0f), 
+            static_cast<float>(spriteSheet.height / 2.0f) 
+        };
+
+        DrawTexturePro(spriteSheet, sourceRec, destRec, origin, 0.0f, WHITE);
+        DrawRectangleLinesEx(heroRect, 2, RED);
     }
 
     void updatePos() {
@@ -144,11 +143,13 @@ public:
             centerX -= xvelocity;
             heroRect.x -= xvelocity;
             isMoving = true;
+            isFacingRight = false;
         }
         if (IsKeyDown(KEY_D) && heroRect.x + heroRect.width < GetScreenWidth()) {
             centerX += xvelocity;
             heroRect.x += xvelocity;
             isMoving = true;
+            isFacingRight = true;
         }
 
         // Update animation frame only when moving
@@ -156,6 +157,26 @@ public:
             updateAnimation();
         } else {
             currentFrame = 0;  // Reset to first frame when not moving
+        }
+    }
+
+    void updateAnimation() {
+        framesCounter++;
+        if (framesCounter >= (60 / framesSpeed)) {
+            framesCounter = 0;
+            
+            // Modify animation logic for reversed running when facing left
+            if (isFacingRight) {
+                currentFrame++;
+                if (currentFrame >= 6) {  // Assuming 6 frames in the sprite sheet
+                    currentFrame = 0;
+                }
+            } else {
+                currentFrame--;
+                if (currentFrame < 0) {  // Reverse animation when facing left
+                    currentFrame = 5;
+                }
+            }
         }
     }
 
@@ -169,13 +190,16 @@ public:
         return false;
     }
 };
+
+// Rest of the main function remains the same as in the previous implementation
+// [The entire previous main() function would be copied here]
+// The changes are only in the Hero class implementation
 void ShowInstructions(int screenWidth, int screenHeight) {
     DrawText("WELCOME TO NO TIME TO DIE!", screenWidth / 2 - 350, screenHeight / 4, 40, WHITE);
     DrawText("Use W, A, S, D to move the hero.", screenWidth / 2 - 250, screenHeight / 4 + 50, 30, WHITE);
     DrawText("Avoid balls and try to survive!", screenWidth / 2 - 250, screenHeight / 4 + 100, 30, WHITE);
     DrawText("Yellow balls can be clicked to destroy.", screenWidth / 2 - 250, screenHeight / 4 + 150, 30, WHITE);
-    DrawText("Press ENTER to start!", screenWidth / 2 - 200, screenHeight / 4 + 200, 30, WHITE);
-}
+    DrawText("Press ENTER to start!", screenWidth / 2 - 200, screenHeight / 4 + 200, 30, WHITE);}
 
 int main() {
     int score = 0;
