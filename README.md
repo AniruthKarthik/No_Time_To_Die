@@ -1,7 +1,3 @@
-Here’s a structured and professional README content for your GitHub project:
-
----
-
 # No Time to Die  
 
 **Built with:**  
