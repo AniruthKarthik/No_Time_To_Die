@@ -27,17 +27,37 @@ Key Features:
    - **Movement**: Score increases when you move.  
    - **Yellow Balls**: Bonus points are awarded for destroying yellow balls.
 
+## Prerequisites  
+You only need to install **Make**. The build script will attempt to install the C++ compiler (g++) and libraries automatically if they are missing.
+
+### Windows  
+- **via Chocolatey** (Recommended):  
+  Run PowerShell as Administrator and type:  
+  ```powershell
+  choco install make
+  ```
+
+### Linux  
+- **Arch Linux**: `sudo pacman -S make`  
+- **Debian/Ubuntu**: `sudo apt update && sudo apt install make`  
+
+### macOS  
+- **via Homebrew**: `brew install make`  
+- *Note: You may be prompted to install Xcode Command Line Tools automatically.*
+
 ## How to Run  
 1. Clone the repository:  
    ```bash
    git clone https://github.com/AniruthKarthik/No_Time_To_Die.git
    cd No_Time_To_Die
    ```
-2. Install Raylib and required dependencies (if not already installed).  
-3. Compile and run the game:  
+2. Build the game (this will also attempt to install dependencies if missing on Linux/macOS):  
    ```bash
-   g++ -o No_Time_To_Die main.cpp -lraylib -std=c++17 -O2
-   ./No_Time_To_Die
+   make game
+   ```
+3. Run the game:  
+   ```bash
+   make run
    ```
 
 ## Assets  
